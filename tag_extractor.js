@@ -3,33 +3,7 @@ const sortObjectsArray = require("sort-objects-array");
 
 async function getSortedResult(data) {
   var sortedData = await sortObjectsArray(data, "followers", { order: "desc" });
-  return sortedData;
-}
-
-async function UserExtractor(tag) {
-  var userData = ["start"];
-  var sortData = [];
-  var tagData = [...new Set(await getTagData(tag))];
-
-  var c = 0;
-
-  var bar = new Promise((resolve, reject) => {
-    tagData.forEach(async (edge, index, array) => {
-      var name = await getUserNames(edge);
-      console.log(name);
-      userData.push(name);
-      console.log(tagData.length + ", " + index);
-      if (index === tagData.length - 1 || name === 429) resolve();
-    });
-  });
-  var flag = false;
-
-  bar.then(() => {
-    console.log("All done!");
-    flag = true;
-    return userData;
-  });
-  if (flag === true) return userData;
+  return await sortedData;
 }
 
 const getTagData = async tag => {
@@ -59,7 +33,7 @@ const getUserNames = async edge => {
     .get(url, {
       headers: {
         "user-agent":
-          "Mozilla/5.0 (Linux; U; Android 5; nl-nl; GT-P6800 Build/HTJ85B) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 123.1.0.26.115 (iPhone11,8; iOS 13_3; en_US; en-US; scale=2.00; 828x1792; 190542906"
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1"
       }
     })
     .then(response => {
@@ -71,77 +45,50 @@ const getUserNames = async edge => {
       console.log(e.response.status);
       r = null;
     });
-  return await r;
+  return r;
 };
-
-exports.UserExtractor = UserExtractor;
-
-// var c = 0;
-//     const n = res.length;
-//     res.forEach(edge => {
-//       var owner_id = edge.node.owner.id;
-//       var url = "https://i.instagram.com/api/v1/users/" + owner_id + "/info/";
-//       axios
-//         .get(url, {
-//           headers: {
-//             "user-agent":
-//               "Mozilla/5.0 (Linux; U; Android 5; nl-nl; GT-P6800 Build/HTJ85B) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 123.1.0.26.115 (iPhone11,8; iOS 13_3; en_US; en-US; scale=2.00; 828x1792; 190542906)"
-//           }
-//         })
-//         .then(function(response) {
-//           var username = response.data.user.username;
-//           var userUrl = "https://www.instagram.com/" + username + "/?__a=1";
-
-//           axios
-//             .get(userUrl, {
-//               headers: {
-//                 "user-agent":
-//                   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 123.1.0.26.115 (iPhone11,8; iOS 13_3; en_US; en-US; scale=2.00; 828x1792; 190542906)"
-//               }
-//             })
-//             .then(response => {
-//               const {
-//                 biography,
-//                 edge_followed_by,
-//                 edge_follow,
-//                 full_name,
-//                 id,
-//                 is_business_account,
-//                 is_private,
-//                 profile_pic_url_hd,
-//                 username
-//               } = response.data.graphql.user;
-//               const user = {
-//                 biography,
-//                 followers: edge_followed_by.count,
-//                 edge_follow: edge_follow.count,
-//                 full_name,
-//                 id,
-//                 is_business_account,
-//                 is_private,
-//                 profile_pic_url_hd,
-//                 username
-//               };
-//               userData.push(user);
-//               c++;
-//             })
-//             .catch(e => {
-//               console.log("oo");
-//             });
-//         })
-//         .catch(function(error) {
-//           // handle error
-//           console.log(error.response.data.message);
-//         });
-//     });
-
-// if (c == n - 1) {
-//   sortData = getSortedResult(userData);
-//   console.log(sortData[0].followers);
-//   return sortData;
-// }
-//   })
-//   .catch(function(error) {
-//     // handle error
-//     console.log("qq");
-//   });
+const getUserData = name => {
+  return axios
+    .get("https://www.instagram.com/" + name + "/?__a=1", {
+      headers: {
+        "user-agent":
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
+      }
+    })
+    .then(function(response) {
+      if (response.data.graphql) {
+        const {
+          biography,
+          edge_followed_by,
+          edge_follow,
+          full_name,
+          id,
+          is_business_account,
+          is_private,
+          profile_pic_url_hd,
+          username
+        } = response.data.graphql.user;
+        const user = {
+          biography,
+          followers: edge_followed_by.count,
+          edge_follow: edge_follow.count,
+          full_name,
+          id,
+          is_business_account,
+          is_private,
+          profile_pic_url_hd,
+          username
+        };
+        return user;
+      } else {
+        return "later";
+      }
+    })
+    .catch(function(e) {
+      return { error: e };
+    });
+};
+exports.getTagData = getTagData;
+exports.getUserNames = getUserNames;
+exports.getUserData = getUserData;
+exports.getSortedResult = getSortedResult;
