@@ -6,7 +6,7 @@ const port = 3000;
 app.get("/", async (req, res) => {
   var users = await user.UserExtractor(req.params.tag);
 
-  if (users[0] !== "start") {
+  if (users.length > 1) {
     console.log("sending");
     await res.send(users);
   } else res.sendStatus(400);

@@ -5,19 +5,31 @@ async function getSortedResult(data) {
   var sortedData = await sortObjectsArray(data, "followers", { order: "desc" });
   return sortedData;
 }
+
 async function UserExtractor(tag) {
   var userData = ["start"];
   var sortData = [];
   var tagData = [...new Set(await getTagData(tag))];
-  var c = 0;
-  tagData.forEach(async edge => {
-    var name = await getUserNames(edge);
-    console.log(name);
-    userData.push(name);
-    await c++;
-  });
 
-  return await userData;
+  var c = 0;
+
+  var bar = new Promise((resolve, reject) => {
+    tagData.forEach(async (edge, index, array) => {
+      var name = await getUserNames(edge);
+      console.log(name);
+      userData.push(name);
+      console.log(tagData.length + ", " + index);
+      if (index === tagData.length - 1 || name === 429) resolve();
+    });
+  });
+  var flag = false;
+
+  bar.then(() => {
+    console.log("All done!");
+    flag = true;
+    return userData;
+  });
+  if (flag === true) return userData;
 }
 
 const getTagData = async tag => {
