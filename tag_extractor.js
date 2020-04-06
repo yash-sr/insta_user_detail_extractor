@@ -12,7 +12,7 @@ const getTagData = async tag => {
     .get("https://www.instagram.com/explore/tags/" + tag + "/?__a=1", {
       headers: {
         "user-agent":
-          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 123.1.0.26.115 (iPhone8,1; iOS 13_3; en_US; en-US; scale=2.00; 750x1334; 190542906)"
       }
     })
     .then(async response => {
@@ -56,6 +56,7 @@ const getUserData = name => {
       }
     })
     .then(function(response) {
+      // console.log(response);
       if (response.data.graphql) {
         const {
           biography,

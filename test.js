@@ -8,8 +8,8 @@ axios
     }
   })
   .then(function(response) {
-    console.log(response);
     var username = response.data.user.username;
+    var printFlag = true;
     var userUrl = "https://www.instagram.com/" + username + "/?__a=1";
     axios
       .get(userUrl, {
@@ -42,9 +42,15 @@ axios
             profile_pic_url_hd,
             username
           };
-          console.log(user);
+          if (printFlag) {
+            console.log(user);
+            printFlag = false;
+          }
         } else {
-          console.log("wait for few minutes");
+          if (printFlag) {
+            console.log(response);
+            printFlag = false;
+          }
         }
       })
       .catch(e => {

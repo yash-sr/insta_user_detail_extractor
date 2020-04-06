@@ -13,23 +13,19 @@ app.get("/", async (req, res) => {
     var name = await extractor.getUserNames(edge);
     await extractor
       .getUserData(name)
-      .then(data => {
+      .then(async data => {
         if (data === "later") {
           l++;
         } else {
-          userData.push(data);
+          userData[userData.length] = data;
           console.log(data);
         }
 
         c++;
-        if (l > tagData.length / 2 && sendFlag) {
-          console.log(l);
-          res.status(404).send("try later");
-          sendFlag = false;
-        }
         if (c === tagData.length - 1 && sendFlag) {
-          userData = extractor.getSortedResult(userData);
-          res.status(201).send(userData);
+          userData = await extractor.getSortedResult(userData);
+          if (userData !== {}) await res.status(201).send(userData);
+          else await res.status(401).send("try later");
           sendFlag = false;
         }
       })
@@ -38,5 +34,5 @@ app.get("/", async (req, res) => {
 });
 
 app.listen(port, () =>
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(`app listening at http://localhost:${port}`)
 );
